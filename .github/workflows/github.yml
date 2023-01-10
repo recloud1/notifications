@@ -22,11 +22,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install black isort flake8-html mypy lxml
+          python -m pip install black isort flake8-html flake8-pyproject mypy lxml
 
       - name: Lint with flake8
         run: |
-          flake8 . --ignore=E231,E241,E712,E731,F403 --exclude=./migrations --statistics --format=html --htmldir=linter_result_${{ matrix.python-version }}
+          pflake8 . --statistics --format=html --htmldir=linter_result_${{ matrix.python-version }}
 
       - name: black
         run: |

@@ -24,6 +24,7 @@ jinja2schema = "^0.1.4"
 cachetools = "^5.2.0"
 sentry-sdk = "^1.12.1"
 sentry-dramatiq = "^0.3.2"
+flake8-pyproject = "^1.2.2"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^6.0.0"
