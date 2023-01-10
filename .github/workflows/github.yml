@@ -25,9 +25,12 @@ jobs:
           python -m pip install black isort flake8-html flake8-pyproject mypy lxml
 
       - name: Lint with flake8
-        run: |
-          pflake8 . --statistics --format=html --htmldir=linter_result_${{ matrix.python-version }}
-
+        uses: py-actions/flake8@v2
+        with:
+          ignore: ["E231", "E241", "E712", "E731", "F403"]
+          exclude: "/migrations"
+          max-line-length: "120"
+          path: "src"
       - name: black
         run: |
           black --check ./ 
