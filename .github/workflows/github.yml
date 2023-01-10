@@ -27,7 +27,12 @@ jobs:
       - name: Lint with flake8
         uses: py-actions/flake8@v2
         with:
-          ignore: "E231","E241","E712","E731","F403"
+          ignore:
+            - "E231"
+            - "E241"
+            - "E712"
+            - "E731"
+            - "F403"
           exclude: "/migrations"
           max-line-length: "120"
           path: "src"
