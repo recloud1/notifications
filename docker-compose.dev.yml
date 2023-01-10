@@ -1,0 +1,17 @@
+version: "3.7"
+services:
+  postgres:
+    volumes:
+      - ${DB_DATA}:/var/lib/postgresql/data
+    ports:
+      - ${DB_PORT}:5432
+    networks:
+      - local_net
+
+  rabbitmq:
+    ports:
+      - "15600:15672"
+
+networks:
+  local_net:
+    driver: bridge

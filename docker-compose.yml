@@ -1,0 +1,81 @@
+version: "3.7"
+services:
+  postgres:
+    container_name: "notification_service_postgres"
+    image: "postgres:12.0-alpine"
+    restart: on-failure
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    env_file:
+      - ./.env
+    volumes:
+      - notification_service_data:/var/lib/postgresql/data
+    networks:
+      - notification_service
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${{DB_NAME}} -U $${{DB_USER}}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    container_name: "notification_service_rabbitmq"
+    restart: "no"
+    image: rabbitmq:3.9.13-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+    networks:
+      - notification_service
+    ports:
+      - ${RABBITMQ_PORT}:5672
+
+  dramatiq:
+    container_name: "notification_service_dramatiq"
+    restart: "no"
+    build:
+      context: .
+    depends_on:
+      - rabbitmq
+    env_file:
+      - ./.env
+    networks:
+      - local_net
+    environment:
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_HOST=rabbitmq
+    entrypoint: [ "dramatiq-gevent", "--processes", "${APP_MAX_WORKERS}", "--threads", "1", "tasks.notifications" ]
+
+  api:
+    container_name: "notification_service_web_app"
+    build:
+      context: .
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - APP_PORT=8000
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - postgres
+    networks:
+      - notification_service
+
+  nginx:
+    container_name: "notification_service_nginx"
+    build: ./nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    networks:
+      - notification_service
+
+volumes:
+  notification_service_data:
+
+networks:
+  notification_service:
+    driver: bridge

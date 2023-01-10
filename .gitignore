@@ -1,0 +1,16 @@
+.idea/
+docs/html/
+.env
+alembic.ini
+venv/
+Lib
+Scripts
+Include
+pyvenv.cfg
+.vscode
+**/__pycache__
+**/.pytest_cache
+downloads
+temp.*
+.mypy_cache/
+.mypy.ini

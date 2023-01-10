@@ -1,0 +1,5 @@
+venv/
+docker-compose.*
+Dockerfile
+.env.example
+readme.md
