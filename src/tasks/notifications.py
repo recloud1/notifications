@@ -38,7 +38,7 @@ def send_email(notification_id: str, send_to: str):
 def enrichment_notification(user_ids: list[str]):
     async with ClientSession() as session:
         url = f"{envs.external.auth}/user-info-batch/"
-        async with session.post(url=url, data={'ids': user_ids}) as response:
+        async with session.post(url=url, data={"ids": user_ids}) as response:
             data = await response.json()
             result = [i.email for i in data]
 
