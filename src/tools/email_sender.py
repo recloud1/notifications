@@ -5,14 +5,14 @@ import ssl
 import time
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from typing import List, Literal, Optional, Tuple, Union
+from typing import Literal
 
 logger = logging.getLogger("email-sender")
 
 
 def smtp_connect(
-    host: str, port: int, login: Optional[str], password: Optional[str], use_ssl=False
-) -> Union[smtplib.SMTP, smtplib.SMTP_SSL]:
+    host: str, port: int, login: str | None, password: str | None, use_ssl=False
+) -> smtplib.SMTP | smtplib.SMTP_SSL:
     """
     Контекстный менеджер для подключения к smtp серверу
     :param host: адрес по которому расположен smtp сервер
@@ -40,7 +40,7 @@ def smtp_connect(
     return server
 
 
-MessageContent = Union[str]
+MessageContent = str
 
 
 class EmailSender:
@@ -52,9 +52,9 @@ class EmailSender:
         self,
         smtp_host: str,
         from_email: str,
-        login: Optional[str] = None,
-        password: Optional[str] = None,
-        smtp_port: Optional[int] = DEFAULT_SMTP_PORT,
+        login: str | None = None,
+        password: str | None = None,
+        smtp_port: int | None = DEFAULT_SMTP_PORT,
         use_ssl: bool = False,
     ):
 
@@ -99,11 +99,11 @@ class EmailSender:
 
     def send_message_safe(
         self,
-        to_email: Union[str, List[str]],
+        to_email: str | list[str],
         content: MessageContent,
         title: str,
         content_type: ContentType = "plain",
-        attachments: Optional[List[Union[str, Tuple[str, str]]]] = None,
+        attachments: list[str | tuple[str, str]] | None = None,
         event_data: str = None,
     ):
         """
@@ -135,7 +135,7 @@ class EmailSender:
 
     def send_message_fast(
         self,
-        to_email: Union[str, List[str]],
+        to_email: str | list[str],
         content: MessageContent,
         title: str,
         content_type: ContentType = "plain",
@@ -185,7 +185,7 @@ class EmailSender:
 
     def _send_message(
         self,
-        connection: Union[smtplib.SMTP_SSL, smtplib.SMTP],
+        connection: smtplib.SMTP_SSL | smtplib.SMTP,
         to_email: str,
         content: MessageContent,
         title: str,

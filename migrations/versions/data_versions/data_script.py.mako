@@ -6,15 +6,13 @@ Create Date: ${create_date}
 
 revision = ${revision}
 
-from typing import Tuple
-
 import sqlalchemy as sa
 
 from .core import DataMigration, GeneratingMigration
 
 
 # Please, write your values here
-data: Tuple[DataMigration, ...] = ()
+data: tuple[DataMigration, ...] = ()
 
 def data_upgrade(op):
     connection: sa.engine.Connection = op.get_bind()

@@ -29,8 +29,6 @@ services:
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
     networks:
       - notification_service
-    ports:
-      - ${RABBITMQ_PORT}:5672
 
   dramatiq:
     container_name: "notification_service_dramatiq"

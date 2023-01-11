@@ -1,5 +1,5 @@
 import contextvars
-from typing import Any, Callable, Mapping, Optional, Tuple, Union
+from typing import Any, Callable, Mapping
 
 import cachetools
 import jinja2
@@ -29,7 +29,7 @@ class DbLoader(jinja2.BaseLoader):
             return templ
         return self._get_template(slug)
 
-    def _get_template(self, slug: str) -> Optional[Template]:
+    def _get_template(self, slug: str) -> Template | None:
         """
         Получение объекта шаблона из БД.
         """
@@ -52,7 +52,7 @@ class DbLoader(jinja2.BaseLoader):
 
     def get_source(
         self, environment: jinja2.Environment, template: str
-    ) -> Tuple[str, Optional[str], Optional[Callable[[], bool]]]:
+    ) -> tuple[str, str | None, Callable[[], bool] | None]:
         """
         Подгрузка шаблона средствами jinja.
 
@@ -92,9 +92,9 @@ class TemplateEnvironment(jinja2.Environment, metaclass=SingletonMeta):
     # noinspection PyMethodOverriding
     def get_template(
         self,
-        name: Union[str, "Template"],
-        parent: Optional[str] = None,
-        globals: Optional[Mapping[str, Any]] = None,
+        name: str | "Template",
+        parent: str | None = None,
+        globals: Mapping[str, Any] | None = None,
         wrap_by_base_template: bool = True,
     ) -> jinja2.Template:
         if wrap_by_base_template:

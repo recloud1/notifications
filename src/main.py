@@ -4,6 +4,7 @@ from starlette.middleware.cors import CORSMiddleware
 from core.config import envs
 from core.log_config import set_logging
 from routes.exceptions import apply_exception_handlers
+from routes.v1.notifications import notifications
 from routes.v1.templates import templates
 
 app = fastapi.FastAPI(
@@ -33,6 +34,4 @@ if not envs.app.cors_policy_enabled:
     )
 
 app.include_router(templates, prefix="/v1/templates", tags=["Templates"])
-# app.include_router(bookmarks, prefix="/v1/bookmarks", tags=["Bookmarks"])
-# app.include_router(likes, prefix="/v1/likes", tags=["Likes"])
-# app.include_router(reviews, prefix="/v1/reviews", tags=["Reviews"])
+app.include_router(notifications, prefix="/v1/notifications", tags=["Notifications"])

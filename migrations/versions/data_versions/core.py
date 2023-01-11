@@ -1,17 +1,17 @@
-from typing import Iterable, List, Tuple
+from typing import Iterable
 
 import sqlalchemy as sa
 
 
 class DataMigration:
-    def __init__(self, insert_query, delete_query, values: List[dict]):
+    def __init__(self, insert_query, delete_query, values: list[dict]):
         self._check_values(values)
         self.values = values
         self.delete_query = delete_query
         self.insert_query = insert_query
 
     @staticmethod
-    def _check_values(values: List[dict]):
+    def _check_values(values: list[dict]):
         return
         # TODO подумать о необходимости
         for value in values:
@@ -33,10 +33,10 @@ class GeneratingMigration(DataMigration):
     def __init__(
         self,
         table_name: str,
-        values: List[dict],
+        values: list[dict],
         move_sequence=True,
         sequence_name: str = None,
-        delete_by_fields: Tuple[str, ...] = ("id",),
+        delete_by_fields: tuple[str, ...] = ("id",),
     ):
 
         self._check_values(values)
@@ -54,13 +54,13 @@ class GeneratingMigration(DataMigration):
         self.move_sequence = move_sequence
         self.table_name = table_name
 
-    def check_delete_key_persist(self, checking: Iterable[str], values: List[dict]):
+    def check_delete_key_persist(self, checking: Iterable[str], values: list[dict]):
         persist_keys = self.collect_keys(values)
         for check in checking:
             if check not in persist_keys:
                 raise ValueError("Delete fields should be specified in all values")
 
-    def build_insert_query(self, table_name: str, values: List[dict]):
+    def build_insert_query(self, table_name: str, values: list[dict]):
         keys = ", ".join(self.collect_keys(values))
         mapping = ", ".join([":" + i for i in self.collect_keys(values)])
         insert_query = f"INSERT INTO {table_name} ({keys}) VALUES ({mapping})"
@@ -76,7 +76,7 @@ class GeneratingMigration(DataMigration):
 
         return query
 
-    def build_delete_query(self, table_name: str, values: List[dict]):
+    def build_delete_query(self, table_name: str, values: list[dict]):
         keys = sorted(self.delete_by_fields)
         filter_condition = " AND ".join([f"{i}=:{i}" for i in keys])
 
@@ -84,7 +84,7 @@ class GeneratingMigration(DataMigration):
         return delete_query
 
     @staticmethod
-    def collect_keys(values: List[dict]) -> List[str]:
+    def collect_keys(values: list[dict]) -> list[str]:
         keys = set()
         for v in values:
             for key in v.keys():

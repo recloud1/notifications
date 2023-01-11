@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.crud.exceptions import ObjectNotExists
+from dependencies.auth import user_info_dep
 from internal.notifications.notifications import (
     notification_crud,
     notification_recurrence_crud,
@@ -14,6 +15,7 @@ from internal.templates.templates import (
     ensure_all_variables_specified,
     get_template,
 )
+from schemas.auth import UserInfo
 from schemas.notifications import NotificationBare, NotificationCreate
 from tasks.notifications import send_notification
 from utils.db_session import get_db_session
@@ -45,7 +47,7 @@ async def create_notification(
     data: NotificationCreate,
     notification_slug: str = Path(..., example="send-invite"),
     session: AsyncSession = Depends(get_db_session),
-    # service: Service = fastapi.Depends(auth_by_service),
+    author: UserInfo = user_info_dep,
 ) -> NotificationBare:
     try:
         async with base_template_installed(session):

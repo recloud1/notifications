@@ -1,4 +1,4 @@
-from typing import Any, Callable, Collection, Iterable, List, Type, TypeVar
+from typing import Any, Callable, Collection, Iterable, Type, TypeVar
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,18 +14,19 @@ async def retrieve_object(
     session: AsyncSession,
     entity: Type[Entity],
     id_: Id,
-    options: List[Any] = None,
+    options: list[Any] = None,
     execution_options: dict[str, Any] = None,
 ) -> Entity:
     """
-    Load object from database and ensure it exists
+    Проверка наличия объекта в базе данных по идентификатору и получение этого объекта.
 
-    :param session: current session
-    :param entity: entity (ORM) class
-    :param id_: object identifier (primary key)
-    :param options: query load optins like joinedload or subqueryload
-    :raise ObjectNotExists: if not found
-    :return:
+    :param session: сессия SQLAlchemy.
+    :param entity: сущность (ORM).
+    :param id_: идентификатор объекта.
+    :param options: параметры подгрузки relations.
+    :param execution_options: параметры, специфичные для конкретного драйвера базы данных.
+    :raise ObjectNotExists: в случае если объект не найден
+    :return: указанная модель объекта.
     """
     query: Select = select(entity).where(entity.id == id_)
     if options:
@@ -41,7 +42,7 @@ async def retrieve_object(
 
 async def pagination(
     session: AsyncSession,
-    ModelClass: Type[Entity],
+    model: Type[Entity],
     page: int = 1,
     rows_per_page: int | None = 25,
     with_count: bool = True,
@@ -51,16 +52,17 @@ async def pagination(
     """
     Выполняет запрос с пагинацией.
 
-    Явно указывать запрос им
-    :param query: запрос по которому будет выполнен запрос
-    :param page: страница
-    :param rows_per_page: кол-во элементов на 1 странице выдачи
-    :param with_deleted: игнорирования удалённых записей использующих SoftDeleteMixin
-    :param ModelClass: класс для возвращаемых значений. Нужен для typehints
-    :return: Список значений и предельное их кол-во
+    :param session: сессия SQLAlchemy.
+    :param model: класс для возвращаемых значений. Нужен для typehints.
+    :param query: запрос по которому будет выполнен запрос.
+    :param page: страница.
+    :param rows_per_page: кол-во элементов на 1 странице выдачи.
+    :param with_count: подсчитывать ли общее количество элементов.
+    :param with_deleted: игнорирования удалённых записей использующих SoftDeleteMixin.
+    :return: Список значений и предельное их кол-во.
     """
     if query is None:
-        query = select(ModelClass)
+        query = select(model)
 
     if with_deleted:
         query = query.execution_options(include_deleted=True)
@@ -95,21 +97,22 @@ async def refresh_collection(
     equal_by: str | Callable[[Existing, Arrived], bool] = "id",
     creation_func: Callable = None,
     **creation_params: Any,
-) -> List[Existing]:
+) -> list[Existing]:
     """
     Актуализация списка значений исходя из прибывших
 
     **Обязательно наличие поля** `id`
 
-    :param session:
-    :param existing_objects:
-    :param arrived_objects:
-    :param equal_by:
-    :param creation_class:
-    :param exclude_on_creation:
-    :param creation_params:
+    :param session: сессия SQLAlchemy.
+    :param existing_objects: текущие объекты.
+    :param arrived_objects: новые объекты.
+    :param equal_by: поле, по которому будет происходить сравнение объектов.
+    :param creation_class: модель для создания сущности.
+    :param exclude_on_creation: поля исключения при создании сущности.
+    :param creation_params: дополнительные параметры для создания сущности.
+    :param creation_func: функция для создания сущности.
     :param secondary_relation_base_obj_name: имя настоящей сущности у secondary объекта
-    :return:
+    :return: список сущностей.
     """
     if exclude_on_creation is None:
         exclude_on_creation = set()
@@ -157,10 +160,12 @@ async def refresh_collection(
 RetrieveType = TypeVar("RetrieveType", bound=Base)
 
 
-def check_missing_entities(ids: Iterable[int], objects: List[Base], model: Base):
+def check_missing_entities(ids: Iterable[int], objects: list[Base]):
     """
     Проверка на наличие несуществующих записей бд между запрашиваемыми идентификаторами и данными из БД
 
+    :param ids: коллекция идентификаторов.
+    :param objects: список объектов.
     :raises: ObjectNotExists при отсутствии 1 или более сущностей в БД
     """
     if len(set(ids)) != len(objects):
@@ -183,14 +188,15 @@ async def retrieve_batch(
     attr_name: str = "id",
 ) -> dict[int | str, RetrieveType]:
     """
-    Запрашивает набор объектов по идентификатором из базы данных
+    Запрашивает набор объектов по идентификаторам из базы данных.
 
-    :param query: запрос для получения сущностей
-    :param model: запрашиваемая модель
-    :param ids: список идентификаторов объектов для данной модели
-    :param attr_name: поле, по которому будут запрашиваться сущности. Подразумевается уникальность по данному полю
-    :raises ObjectNotExists при отсутствии одной из запрашиваемых записей
-    :return: словарь из пар идентификатор:объект
+    :param session: сессия SQLAlchemy.
+    :param query: запрос для получения сущностей.
+    :param model: запрашиваемая модель.
+    :param ids: список идентификаторов объектов для данной модели.
+    :param attr_name: поле, по которому будут запрашиваться сущности. Подразумевается уникальность по данному полю.
+    :raises ObjectNotExists при отсутствии одной из запрашиваемых записей.
+    :return: словарь из пар идентификатор:объект.
     """
 
     query = (select(model) if query is None else query).where(

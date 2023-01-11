@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import Field, root_validator, validator
 
@@ -100,7 +100,7 @@ class NotificationCreate(Model):
         default=None,
         description="Идентификатор пользователя при директивной отправке уведомления",
     )
-    contacts: Dict[Backend, Optional[str]] = Field(
+    contacts: dict[Backend, str | None] = Field(
         default=None,
         description="Данные по которым будут отправлены уведомления. "
         "Может быть почтой/никнеймом или чем-то другим, "
@@ -111,7 +111,7 @@ class NotificationCreate(Model):
             Backend.sms.value: "Можно ничего и не указывать. Или id пользователя",
         },
     )
-    template_data: Dict[str, Any] = Field(
+    template_data: dict[str, Any] = Field(
         ...,
         description="Переменные для подстановки в шаблон уведомления",
         example={
@@ -139,7 +139,7 @@ class NotificationCreate(Model):
 
 
 class NotificationCreateBatch(Model):
-    data: List[NotificationCreate]
+    data: list[NotificationCreate]
 
 
 class NotificationBare(NotificationCreate, UidMixin):
@@ -148,4 +148,4 @@ class NotificationBare(NotificationCreate, UidMixin):
 
 
 class NotificationsList(ListModel):
-    data: List[NotificationBare]
+    data: list[NotificationBare]

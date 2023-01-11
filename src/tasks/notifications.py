@@ -20,7 +20,7 @@ def send_notification(notification_id: str):
         )
         for backend, send_to in notification.contacts.items():
             if not send_to:
-                send_to = enrichment_notification.send(notification.user_id)
+                send_to = enrichment_notification.send([notification.user_id])
 
             handler = backend_handlers.get(backend)
 
@@ -35,12 +35,12 @@ def send_email(notification_id: str, send_to: str):
 
 
 @dramatiq.actor
-def enrichment_notification(user_id: str):
+def enrichment_notification(user_ids: list[str]):
     async with ClientSession() as session:
-        url = f"{envs.external.auth}/user-info/{user_id}"
-        async with session.get(url=url) as response:
+        url = f"{envs.external.auth}/user-info-batch/"
+        async with session.post(url=url, data={'ids': user_ids}) as response:
             data = await response.json()
-            result = data.email
+            result = [i.email for i in data]
 
             return result
 
